@@ -1,0 +1,47 @@
+name: e2e-tests
+
+# The pull_request trigger is deliberately left out: on a public repo it would
+# let anyone who opens a PR run code in this workflow.
+on:
+  push:
+    branches: [main, "capstone/**"]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Playwright browser
+        run: python -m playwright install --with-deps chromium
+
+      - name: Run API tests
+        run: pytest -m api --html=reports/api-report.html --self-contained-html --junitxml=reports/api-results.xml
+
+      - name: Run UI tests
+        if: always()
+        run: pytest -m ui --reruns 1 --reruns-delay 5 --html=reports/ui-report.html --self-contained-html --junitxml=reports/ui-results.xml
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 14

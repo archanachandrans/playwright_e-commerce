@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Virtual environments and local settings
+.venv/
+venv/
+.env
+
+# Generated test output (HTML/JUnit reports, logs, failure screenshots).
+# Reports are produced by each run and uploaded by CI as the test-reports artifact.
+reports/
